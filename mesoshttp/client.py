@@ -5,6 +5,7 @@ import socket
 import sys
 
 import requests
+from mesoshttp.acs import DCOSServiceAuth
 
 from mesoshttp.offers import Offer
 from mesoshttp.core import CoreMesosObject
@@ -39,13 +40,13 @@ class MesosClient(object):
         Handler to communicate with scheduler
 
         `MesosClient.SchedulerDriver` instance is available after the
-        SUBSCRIBED event with the subcribed event.
+        SUBSCRIBED event with the subscribed event.
         '''
-        def __init__(self, mesos_url, frameworkId, streamId):
+        def __init__(self, mesos_url, frameworkId, streamId, requests_auth, verify):
             '''
             Create a driver instance related to created framework
             '''
-            CoreMesosObject.__init__(self, mesos_url, frameworkId, streamId)
+            CoreMesosObject.__init__(self, mesos_url, frameworkId, streamId, requests_auth, verify)
             self.driver = None
 
         def tearDown(self):
@@ -66,6 +67,7 @@ class MesosClient(object):
                     self.mesos_url + '/api/v1/scheduler',
                     json.dumps(teardown),
                     headers=headers,
+                    auth=self.requests_auth,
                     verify=self.verify
                 )
             except Exception as e:
@@ -95,6 +97,7 @@ class MesosClient(object):
                     self.mesos_url + '/api/v1/scheduler',
                     json.dumps(revive),
                     headers=headers,
+                    auth=self.requests_auth,
                     verify=self.verify
                 )
             except Exception as e:
@@ -120,6 +123,7 @@ class MesosClient(object):
                     self.mesos_url + '/api/v1/scheduler',
                     json.dumps(revive),
                     headers=headers,
+                    auth=self.requests_auth,
                     verify=self.verify
                 )
             except Exception as e:
@@ -153,6 +157,7 @@ class MesosClient(object):
                     self.mesos_url + '/api/v1/scheduler',
                     json.dumps(message),
                     headers=headers,
+                    auth=self.requests_auth,
                     verify=self.verify
                 )
             except Exception as e:
@@ -188,6 +193,7 @@ class MesosClient(object):
                     self.mesos_url + '/api/v1/scheduler',
                     json.dumps(message),
                     headers=headers,
+                    auth=self.requests_auth,
                     verify=self.verify
                 )
             except Exception as e:
@@ -227,6 +233,7 @@ class MesosClient(object):
                     self.mesos_url + '/api/v1/scheduler',
                     json.dumps(message),
                     headers=headers,
+                    auth=self.requests_auth,
                     verify=self.verify
                 )
             except Exception as e:
@@ -263,6 +270,7 @@ class MesosClient(object):
                     self.mesos_url + '/api/v1/scheduler',
                     json.dumps(message),
                     headers=headers,
+                    auth=self.requests_auth,
                     verify=self.verify
                 )
             except Exception as e:
@@ -311,8 +319,7 @@ class MesosClient(object):
             frameworkUser='root',
             frameworkHostname='',
             frameworkWebUI='',
-            max_reconnect=3,
-            verify=False):
+            max_reconnect=3):
         '''
         Create a frameworkId
 
@@ -330,8 +337,6 @@ class MesosClient(object):
         :type frameworkWebUI: str
         :param max_reconnect: number of reconnection retries when connection fails
         :type max_reconnect: int  defaults to 3
-        :param verify: validate HTTPS fronted Mesos API using CA root trusts, defaults to False
-        :type verify: bool
         '''
         self.frameworkId = frameworkId
         self.frameworkName = frameworkName
@@ -358,7 +363,6 @@ class MesosClient(object):
             MesosClient.RECONNECTED: []
         }
 
-        self.authenticate = False
         self.principal = None
         self.secret = None
         self.long_pool = None
@@ -367,7 +371,8 @@ class MesosClient(object):
         self.capabilities = []
         self.master_info = None
         self.disconnected = False
-        self.verify = verify
+        self.requests_auth = None
+        self.verify = None
 
     def set_credentials(self, principal, secret):
         '''
@@ -378,9 +383,22 @@ class MesosClient(object):
         :param secret: password
         :type secret: str
         '''
-        self.authenticate = True
         self.principal = principal
         self.secret = secret
+
+    def set_service_account(self, service_secret, verify=False):
+        '''
+        Set credentials to authenticate with DCOS and Mesos Master
+
+        :param service_secret: Optional DCOS Service account secret. Supersedes principal / secret.
+        :type service_secret: dict
+        :param verify: validate HTTPS fronted Mesos API using CA root trusts, defaults to False
+        :type verify: bool
+        '''
+
+        self.requests_auth = DCOSServiceAuth(service_secret)
+        self.principal = self.requests_auth.principal
+        self.verify = verify
 
     def tearDown(self):
         '''
@@ -586,12 +604,13 @@ class MesosClient(object):
         if self.failover_timeout:
             subscribe['subscribe']['framework_info']['failover_timeout'] = self.failover_timeout
 
-        if self.authenticate:
+        if self.principal:
             subscribe['subscribe']['framework_info']['principal'] = self.principal
-            credentials = [
-                {'principal': self.principal, 'secret': self.secret}
-            ]
-            subscribe['subscribe']['credentials'] = credentials
+            if self.secret:
+                credentials = [
+                    {'principal': self.principal, 'secret': self.secret}
+                ]
+                subscribe['subscribe']['credentials'] = credentials
 
         if self.frameworkId:
             subscribe['subscribe']['framework_info']['id'] = {
@@ -618,7 +637,9 @@ class MesosClient(object):
                     json.dumps(subscribe),
                     stream=True,
                     headers=headers,
-                    verify=self.verify
+                    verify=self.verify,
+                    auth=self.requests_auth
+
                 )
                 self.logger.debug("Subscribe HTTP answer: " + str(self.long_pool.status_code))
                 if self.long_pool.status_code == 307:
@@ -631,6 +652,7 @@ class MesosClient(object):
                             json.dumps(subscribe),
                             stream=True,
                             headers=headers,
+                            auth=self.requests_auth,
                             verify=self.verify
                         )
                 ok = True
@@ -780,6 +802,7 @@ class MesosClient(object):
                 self.mesos_url + '/api/v1/scheduler',
                 message,
                 headers=headers,
+                auth=self.requests_auth,
                 verify=self.verify
             )
             self.logger.debug('Mesos:Accept:' + str(message))
