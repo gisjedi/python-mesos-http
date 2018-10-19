@@ -31,10 +31,11 @@ class Test(object):
     def __init__(self):
         logging.basicConfig()
         self.logger = logging.getLogger(__name__)
-        #signal.signal(signal.SIGINT, signal.SIG_IGN)
         logging.getLogger('mesoshttp').setLevel(logging.DEBUG)
         self.driver = None
-        self.client = MesosClient(mesos_urls=['https://leader.mesos/mesos'], verify=False)
+        self.client = MesosClient(mesos_urls=['https://leader.mesos/mesos'])
+        #self.client = MesosClient(mesos_urls=['zk://leader.mesos:2181/mesos'])
+        self.client.set_service_account(json.loads(os.getenv('SERVICE_SECRET')))
         self.client.on(MesosClient.SUBSCRIBED, self.subscribed)
         self.client.on(MesosClient.OFFERS, self.offer_received)
         self.client.on(MesosClient.UPDATE, self.status_update)
@@ -51,8 +52,8 @@ class Test(object):
     def shutdown(self):
         print('Stop requested by user, stopping framework....')
         self.logger.warn('Stop requested by user, stopping framework....')
-        self.driver.tearDown()
         self.client.stop = True
+        self.driver.tearDown()
         self.stop = True
 
 
