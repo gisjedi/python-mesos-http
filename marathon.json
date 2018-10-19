@@ -1,0 +1,33 @@
+{
+  "id": "/python-mesos-http",
+  "instances": 1,
+  "container": {
+    "portMappings": [],
+    "type": "DOCKER",
+    "volumes": [],
+    "docker": {
+      "image": "gisjedi/python-mesos-http"
+    }
+  },
+  "cpus": 0.1,
+  "mem": 128,
+  "secrets": {
+    "secret0": {
+      "source": "service-account-secret"
+    }
+  },
+  "requirePorts": false,
+  "networks": [
+    {
+      "mode": "container/bridge"
+    }
+  ],
+  "healthChecks": [],
+  "fetch": [],
+  "env": {
+    "SERVICE_SECRET": {
+      "secret": "secret0"
+    }
+  },
+  "constraints": []
+}

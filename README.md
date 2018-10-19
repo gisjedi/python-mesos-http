@@ -15,6 +15,28 @@ See sample/test.py for example.
 
 Callbacks will "block" the mesos message treatment, so they should be short, or messages should be forwarded to a queue in an other thread/process where longer tasks will handle messages.
 
+# DCOS EE Strict
+
+Additions have been made to support login with ACS to allow access through to the master
+in a Strict security posture. The `sample/test.py` script is configured to accept the `SERVICE_SECRET` environment variable, which can be created and passed to the 
+service using the attached Dockerfile and scripts given below:
+
+```
+dcos security org service-accounts keypair service-account-private.pem service-account-public.pem
+dcos security org service-accounts create -p service-account-public.pem -d "Service account for Scale data processing framework" service-account
+dcos security secrets create-sa-secret --strict service-account-private.pem service-account service-account-secret
+
+# Test with SUPERUSER perms on user
+dcos security org users grant service-account dcos:superuser full
+
+# Build image to test
+docker build -t gisjedi/python-mesos-http .
+docker push gisjedi/python-mesos-http
+
+# Deploy app consuming image to marathon
+dcos marathon app add marathon.json
+```
+
 # About
 
 This library does not implement all options of mesos.proto and manages schedulers only (not executors). Implemented features should be enough to implement a scheduler, if something is missing, please ask, or contribute ;-)
