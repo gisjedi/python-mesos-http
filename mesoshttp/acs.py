@@ -69,11 +69,10 @@ class DCOSServiceAuth(AuthBase):
         payload = {'uid': self._user, 'token': self._generate_token(self._user, self._key, self._scheme)}
         response = requests.post(self._acs_endpoint, json=payload, verify=self._verify)
 
-        if response.status_code == 200:
-            self._token = response.json()['token']
-
-        raise Exception('Unable to authenticate against DCOS ACS: {} {}'.format(response.status_code,
-                                                                                response.text))
+        if response.status_code != 200:
+            raise Exception('Unable to authenticate against DCOS ACS: {} {}'.format(response.status_code,
+                                                                                    response.text))
+        self._token = response.json()['token']
 
     def __call__(self, r):
         r.headers['Authorization'] = 'token={}'.format(self.token)
