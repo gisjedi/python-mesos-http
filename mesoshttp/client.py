@@ -490,8 +490,10 @@ class MesosClient(object):
         On message, callbacks will be called.
         '''
         res = False
+        attempt = 0
         while not self.stop and not self.disconnect:
             try:
+                attempt += 1
                 self.driver = None
                 self.mesos_url_index = 0
                 self.logger.info("try to register")
@@ -515,6 +517,8 @@ class MesosClient(object):
             if not self.stop and not self.disconnect:
                 if not res:
                     self.logger.error('Failed to register, retrying...')
+                if attempt >= self.max_reconnect:
+                    break
                 time.sleep(MesosClient.WAIT_TIME)
         else:
             self.logger.error('All connection tries failed')
