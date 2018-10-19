@@ -35,7 +35,9 @@ class Test(object):
         self.driver = None
         self.client = MesosClient(mesos_urls=['https://leader.mesos/mesos'])
         #self.client = MesosClient(mesos_urls=['zk://leader.mesos:2181/mesos'])
-        self.client.set_service_account(json.loads(os.getenv('SERVICE_SECRET')))
+        secret = os.getenv('SERVICE_SECRET')
+        if secret:
+            self.client.set_service_account(json.loads(secret))
         self.client.on(MesosClient.SUBSCRIBED, self.subscribed)
         self.client.on(MesosClient.OFFERS, self.offer_received)
         self.client.on(MesosClient.UPDATE, self.status_update)
