@@ -34,8 +34,7 @@ class Test(object):
         #signal.signal(signal.SIGINT, signal.SIG_IGN)
         logging.getLogger('mesoshttp').setLevel(logging.DEBUG)
         self.driver = None
-        self.client = MesosClient(mesos_urls=['http://127.0.0.1:5050'])
-        #self.client = MesosClient(mesos_urls=['zk://127.0.0.1:2181/mesos'])
+        self.client = MesosClient(mesos_urls=['https://leader.mesos/mesos'], verify=False)
         self.client.on(MesosClient.SUBSCRIBED, self.subscribed)
         self.client.on(MesosClient.OFFERS, self.offer_received)
         self.client.on(MesosClient.UPDATE, self.status_update)
