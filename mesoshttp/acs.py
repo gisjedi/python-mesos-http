@@ -5,6 +5,8 @@ import jwt
 import requests
 from requests.auth import AuthBase
 
+from mesoshttp.exception import ACSException
+
 
 class DCOSServiceAuth(AuthBase):
     """Attaches a token to Request object that will allow requests to be made through DCOS Admin Router."""
@@ -12,7 +14,7 @@ class DCOSServiceAuth(AuthBase):
     def __init__(self, secret, verify=False):
         """Take a DCOS service account secret and breaks out components needed for login flow
 
-        :param secret: dict that must includ uid, private_key, scheme and login_endpoint keys
+        :param secret: dict that must include uid, private_key, scheme and login_endpoint keys
         :param verify: `False` or path to a PEM encoded trust bundle
         :return: :class:`DCOSServiceAuth`
         """
@@ -70,8 +72,8 @@ class DCOSServiceAuth(AuthBase):
         response = requests.post(self._acs_endpoint, json=payload, verify=self._verify)
 
         if response.status_code != 200:
-            raise Exception('Unable to authenticate against DCOS ACS: {} {}'.format(response.status_code,
-                                                                                    response.text))
+            raise ACSException('Unable to authenticate against DCOS ACS: {} {}'.format(response.status_code,
+                                                                                       response.text))
         self._token = response.json()['token']
 
     def __call__(self, r):
