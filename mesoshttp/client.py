@@ -288,6 +288,7 @@ class MesosClient(object):
                 self.mesos_url,
                 frameworkId=self.frameworkId,
                 streamId=self.streamId,
+                requests_auth=self.requests_auth,
                 verify=self.verify
             )
         return self.driver
@@ -720,7 +721,9 @@ class MesosClient(object):
                                 self.mesos_url,
                                 frameworkId=self.frameworkId,
                                 streamId=self.streamId,
-                                mesosOffer=mesos_offer
+                                mesosOffer=mesos_offer,
+                                requests_auth=self.requests_auth,
+                                verify=self.verify
                             )
                         )
                     self.__event_offers(offers)
@@ -730,7 +733,9 @@ class MesosClient(object):
                         self.mesos_url,
                         frameworkId=self.frameworkId,
                         streamId=self.streamId,
-                        mesosUpdate=mesos_update
+                        mesosUpdate=mesos_update,
+                        requests_auth=self.requests_auth,
+                        verify=self.verify 
                     )
                     update_event.ack()
                     self.__event_update(mesos_update)
