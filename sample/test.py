@@ -1,12 +1,7 @@
 import json
-import datetime
-import time
 import os
-import sys
 import threading
 import logging
-import signal
-import sys
 import uuid
 
 from mesoshttp.client import MesosClient
@@ -33,10 +28,14 @@ class Test(object):
         self.logger = logging.getLogger(__name__)
         logging.getLogger('mesoshttp').setLevel(logging.DEBUG)
         self.driver = None
-        self.client = MesosClient(mesos_urls=['https://leader.mesos/mesos'])
-        #self.client = MesosClient(mesos_urls=['zk://leader.mesos:2181/mesos'])
+        # By default use ZK for master detection
+        self.client = MesosClient(mesos_urls=['zk://leader.mesos:2181/mesos'])
         secret = os.getenv('SERVICE_SECRET')
         if secret:
+            # We are in Enterprise mode and using service account
+            # so we can rely on DCOS AdminRouter getting us to the Master as we
+            # will have an authentication token
+            self.client = MesosClient(mesos_urls=['https://leader.mesos/mesos'])
             self.client.set_service_account(json.loads(secret))
         self.client.on(MesosClient.SUBSCRIBED, self.subscribed)
         self.client.on(MesosClient.OFFERS, self.offer_received)
