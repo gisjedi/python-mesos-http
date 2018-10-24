@@ -399,7 +399,16 @@ class MesosClient(object):
 
         self.requests_auth = DCOSServiceAuth(service_secret)
         self.principal = self.requests_auth.principal
-        self.verify = verify
+
+        cert_file = 'dcos-ca.crt'
+
+        if not verify:
+            response = requests.get('https://leader.mesos/ca/' + cert_file, verify=False)
+
+            if response.status_code == 200:
+                with open(cert_file, 'w') as cert:
+                    cert.write(response.text)
+        self.verify = cert_file
 
     def tearDown(self):
         '''
