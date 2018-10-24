@@ -35,6 +35,22 @@ docker push gisjedi/python-mesos-http
 
 # Deploy app consuming image to marathon
 dcos marathon app add marathon.json
+
+# Once success has been confirmed, more granular permissions should be applied
+dcos security org users revoke service-account dcos:superuser full
+dcos security org users grant service-account dcos:mesos:agent:task create
+dcos security org users grant service-account dcos:mesos:agent:task:app_id create
+dcos security org users grant service-account dcos:mesos:agent:task:user:nobody create
+dcos security org users grant service-account dcos:mesos:master:framework create
+dcos security org users grant service-account dcos:mesos:master:reservation create
+dcos security org users grant service-account dcos:mesos:master:reservation delete
+dcos security org users grant service-account dcos:mesos:master:reservation:principal:service_account delete
+dcos security org users grant service-account dcos:mesos:master:task create
+dcos security org users grant service-account dcos:mesos:master:task:app_id create
+dcos security org users grant service-account dcos:mesos:master:task:user:nobody create
+dcos security org users grant service-account dcos:mesos:master:volume create
+dcos security org users grant service-account dcos:mesos:master:volume delete
+dcos security org users grant service-account dcos:mesos:master:volume:principal:service_account delete
 ```
 
 # About
