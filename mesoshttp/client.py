@@ -5,6 +5,8 @@ import socket
 import sys
 
 import requests
+from requests.exceptions import ConnectionError
+
 from mesoshttp.acs import DCOSServiceAuth
 
 from mesoshttp.offers import Offer
@@ -585,7 +587,15 @@ class MesosClient(object):
                 data = data.decode("utf-8")
             master_info = json.loads(data)
             if 'pid' in master_info and master_info['pid'].startswith('master@'):
-                mesos_master = 'http://' + master_info['pid'].replace('master@', '')
+                mesos_master = master_info['pid'].replace('master@', '')
+
+                try:
+                    requests.get('http://' + mesos_master)
+                    mesos_master = 'http://' + mesos_master
+                # If we get connection closed, assume we are in strict mode and set https protocol
+                except ConnectionError:
+                    mesos_master = 'https://' + mesos_master
+
                 break
         zk.stop()
         self.logger.debug('Zookeeper mesos master: %s' % (str(mesos_master)))

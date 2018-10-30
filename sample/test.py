@@ -36,6 +36,9 @@ class Test(object):
             # so we can rely on DCOS AdminRouter getting us to the Master as we
             # will have an authentication token
             self.client = MesosClient(mesos_urls=['https://leader.mesos/mesos'])
+            # We could also use the zk_detect functionality as it is able to detect
+            # https requirement when connecting to Mesos
+            #self.client = MesosClient(mesos_urls=['zk://leader.mesos:2181/mesos'])
             self.client.set_service_account(json.loads(secret))
         self.client.on(MesosClient.SUBSCRIBED, self.subscribed)
         self.client.on(MesosClient.OFFERS, self.offer_received)
