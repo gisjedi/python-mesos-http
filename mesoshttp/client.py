@@ -375,7 +375,7 @@ class MesosClient(object):
         self.master_info = None
         self.disconnected = False
         self.requests_auth = None
-        self.verify = None
+        self.verify = True
 
     def set_credentials(self, principal, secret):
         '''

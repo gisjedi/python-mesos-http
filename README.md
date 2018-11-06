@@ -19,7 +19,7 @@ Callbacks will "block" the mesos message treatment, so they should be short, or 
 
 Additions have been made to support login with ACS to allow access through to the master
 in a Strict security posture. The `sample/test.py` script is configured to accept the `SERVICE_SECRET` environment variable, which can be created and passed to the 
-service using the attached Dockerfile and scripts given below:
+service using the script given below:
 
 ```
 dcos security org service-accounts keypair service-account-private.pem service-account-public.pem
@@ -30,11 +30,11 @@ dcos security secrets create-sa-secret --strict service-account-private.pem serv
 dcos security org users grant service-account dcos:superuser full
 
 # Build image to test - update name in 2 commands below and marathon.json to your personal Docker Hub account name
-docker build -t gisjedi/python-mesos-http .
+docker build -t gisjedi/python-mesos-http -f Dockerfile-test-framework .
 docker push gisjedi/python-mesos-http
 
 # Deploy app consuming image to marathon
-dcos marathon app add marathon.json
+dcos marathon app add sample/marathon.json
 
 # Once success has been confirmed, more granular permissions should be applied
 dcos security org users revoke service-account dcos:superuser full

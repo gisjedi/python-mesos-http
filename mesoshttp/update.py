@@ -12,7 +12,7 @@ class Update(CoreMesosObject):
     This class manages Update message from Mesos master
     '''
 
-    def __init__(self, mesos_url, frameworkId, streamId, mesosUpdate, requests_auth, verify):
+    def __init__(self, mesos_url, frameworkId, streamId, mesosUpdate, requests_auth=None, verify=True):
         CoreMesosObject.__init__(self, mesos_url, frameworkId, streamId, requests_auth, verify)
         self.logger = logging.getLogger(__name__)
         self.mesosUpdate = mesosUpdate

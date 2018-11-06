@@ -1,12 +1,12 @@
 {
-  "id": "/python-mesos-http",
+  "id": "/mesoshttp-test-framework",
   "instances": 1,
   "container": {
     "portMappings": [],
     "type": "DOCKER",
     "volumes": [],
     "docker": {
-      "image": "osallou/python-mesos-http"
+      "image": "gisjedi/python-mesos-http"
     }
   },
   "cpus": 0.1,
