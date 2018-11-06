@@ -44,7 +44,7 @@ class MesosClient(object):
         `MesosClient.SchedulerDriver` instance is available after the
         SUBSCRIBED event with the subscribed event.
         '''
-        def __init__(self, mesos_url, frameworkId, streamId, requests_auth, verify):
+        def __init__(self, mesos_url, frameworkId, streamId, requests_auth=None, verify=True):
             '''
             Create a driver instance related to created framework
             '''
