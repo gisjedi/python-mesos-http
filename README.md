@@ -29,7 +29,7 @@ dcos security secrets create-sa-secret --strict service-account-private.pem serv
 # Test with SUPERUSER perms on user
 dcos security org users grant service-account dcos:superuser full
 
-# Build image to test
+# Build image to test - update name in 2 commands below and marathon.json to your personal Docker Hub account name
 docker build -t gisjedi/python-mesos-http .
 docker push gisjedi/python-mesos-http
 

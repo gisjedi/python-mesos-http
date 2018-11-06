@@ -6,7 +6,7 @@
     "type": "DOCKER",
     "volumes": [],
     "docker": {
-      "image": "gisjedi/python-mesos-http"
+      "image": "osallou/python-mesos-http"
     }
   },
   "cpus": 0.1,
