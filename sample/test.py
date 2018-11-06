@@ -27,6 +27,7 @@ class Test(object):
         logging.basicConfig()
         self.logger = logging.getLogger(__name__)
         logging.getLogger('mesoshttp').setLevel(logging.DEBUG)
+        
         self.driver = None
         # Note: leader.mesos address requires Mesos DNS
         #self.client = MesosClient(mesos_urls=['zk://leader.mesos:2181/mesos'])
@@ -34,17 +35,17 @@ class Test(object):
         # Example: Zookeeper master discovery
         #self.client = MesosClient(mesos_urls=['zk://127.0.0.1:2181/mesos'])
         # Example: Directly address Mesos 
+        #self.client = MesosClient(mesos_urls=['http://127.0.0.1:5050'])
+        
         # By default, use direct master addressing
-        self.client = MesosClient(mesos_urls=['http://127.0.0.1:5050'])
+        # Allow for comma delimited URLs to be passed in via MASTER_URLS
+        # environment variable
+        master_urls = os.getenv('MESOS_URLS', 'http://127.0.0.1:5050')
+        self.client = MesosClient(mesos_urls=master_urls.split(','))
+        
+        
         secret = os.getenv('SERVICE_SECRET')
         if secret:
-            # Secrets and service accounts are only available in DCOS Enterprise
-            # so we can rely on Mesos DNS and AdminRouter getting us to the Master,
-            # as we will have an authentication token
-            self.client = MesosClient(mesos_urls=['https://leader.mesos/mesos'])
-            # We could also use the zk_detect functionality as it is able to detect
-            # https requirement when connecting to Mesos
-            #self.client = MesosClient(mesos_urls=['zk://leader.mesos:2181/mesos'])
             self.client.set_service_account(json.loads(secret))
         self.client.on(MesosClient.SUBSCRIBED, self.subscribed)
         self.client.on(MesosClient.OFFERS, self.offer_received)

@@ -27,7 +27,8 @@
   "env": {
     "SERVICE_SECRET": {
       "secret": "secret0"
-    }
+    },
+    "MESOS_URLS": "zk://leader.mesos:2181/mesos"
   },
   "constraints": []
 }
